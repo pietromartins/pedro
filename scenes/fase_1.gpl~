@@ -2,12 +2,13 @@ GIMP Palette
 Name: fase_1
 Columns: 0
 #
-  0   0   0	chao
+  0   0   0	black
 217 186  93	portal
-241  43  63	escada_diagonal
+241  43  43	escada_diagonal
  65  43 241	escada
 180  1  255	muro_sob
   6 248   6	botao
 255   0 255	ator
 255   0   0	escada_de_agonal
+  0 255 255	chao
 
