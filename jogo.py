@@ -8,6 +8,9 @@ import mapengine
 from mapengine import Scene, simpleloop
 from mapengine.base import Actor, MainActor, GameObject, Directions, Event, Vector
 
+class ator_voador(MainActor):
+    pass
+
 class ator(MainActor):
     weight = Directions.DOWN
     jumping = 0
@@ -17,14 +20,13 @@ class ator(MainActor):
     def move(self, direction):
         abaixo = Vector((self.pos[0], self.pos[1] + 1))
         if direction.y == -1 and not self.checa_abaixo() and self.jumping <= 0:
-           direction.y = 0 
-        
-        #if self.jumping > 0:
-        #    direction.y = -1
+            if not isinstance(self.controller.scene[self.pos], Escada):
+                direction=Vector(direction)
+                direction.y = 0 
         return super(ator, self).move(direction)
     
     def checa_abaixo(self):
-        object = self.controller[self.pos[0], self.pos[1] + self.weight[1]]
+        object = self.controller[self.pos + Directions.DOWN]
         hardness = getattr(object, "hardness", 0)
         return  hardness < self.strength
 
@@ -33,8 +35,10 @@ class ator(MainActor):
         if self.jumping > 0:
             self.jumping -= 1
         if (self.pos[1] < self.controller.scene.height - 2):
+            object = self.controller.scene[self.pos]
             
-            if self.checa_abaixo() and self.weight[1] and not self.jumping > 0:
+            if self.checa_abaixo() and self.weight[1] and not self.jumping > 0 and\
+               not isinstance(object, Escada):
                 self.falling_counter += 1
                 if self.falling_counter >= self.base_move_rate:
                     saved_value = self.move_counter
@@ -46,18 +50,14 @@ class ator(MainActor):
     # Método on_fire é acionado quando aperta espaço
     # Implementa o pulo
     def on_fire(self):
-        object = self.controller.scene[self.pos[0], self.pos[1] + self.weight[1]]
-        print self.checa_abaixo()
+        #print self.checa_abaixo(), self.jumping, self.move_counter
+        import os
+        if os.path.exists("/tmp/bla"):
+            import pdb; pdb.set_trace()
         if self.jumping <= 0 and (not self.checa_abaixo() or isinstance(object, Escada)):
             self.jumping = 20
             self.move(Directions.UP)
-        # if not self.weight == Directions.DOWN:
-        #    return
-        #self.weight = Directions.UP
-        #self.move((0, -1))
-        # self.events.add(Event(5, "weight", Directions.DOWN))
-        
-       
+               
 
 
 # Black corresponde à cor azul na fase
@@ -85,16 +85,25 @@ class Escada_diagonal(GameObject):
 class Escada(GameObject):
     hardness = 2
     def on_over(self, other):
-        if isinstance(other, ator):
-            other.weight = Vector((0, 0))
-            other.events.add(Event(5, "weight", Vector((0, 1))))
-        super(Escada, self).on_touch(other)
+        #
+        # if isinstance(other, ator):
+        #    other.weight = Vector((0, 0))
+        #    other.events.add(Event(5, "weight", Vector((0, 1))))
+        super(Escada, self).on_over(other)
         
         
 class Portal(GameObject):
     hardness = 10
+    
     def on_touch(self, other):
-        cena = Scene("fase_2")
+        self.show_text("Vamos para a proxima fase", duration=5)
+        other.events.add(Event(20, self.passar_fase, None))
+
+    def passar_fase(self):
+        scene_name = self.controller.scene.scene_name
+        scene_number = int(scene_name.split("_")[-1])
+        next_scene = "fase_%d" % (scene_number + 1)
+        cena = Scene(next_scene)
         self.controller.load_scene(cena)
         self.controller.force_redraw = True
            
