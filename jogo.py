@@ -6,7 +6,7 @@ sys.path.insert(0, os.getcwd() + "/mapengine")
 
 import mapengine
 from mapengine import Scene, simpleloop
-from mapengine.base import Actor, MainActor, GameObject, Event, Directions, Event, Vector
+from mapengine.base import Actor, MainActor, GameObject, Directions, Event, Vector
 
 class ator(MainActor):
     weight = Directions.DOWN
@@ -46,8 +46,9 @@ class ator(MainActor):
     # Método on_fire é acionado quando aperta espaço
     # Implementa o pulo
     def on_fire(self):
-        object = self.controller[self.pos[0], self.pos[1] + self.weight[1]]
-        if self.jumping == 0 and (not self.checa_abaixo() or isinstance(object, Escada)):
+        object = self.controller.scene[self.pos[0], self.pos[1] + self.weight[1]]
+        print self.checa_abaixo()
+        if self.jumping <= 0 and (not self.checa_abaixo() or isinstance(object, Escada)):
             self.jumping = 20
             self.move(Directions.UP)
         # if not self.weight == Directions.DOWN:
