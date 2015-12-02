@@ -7,6 +7,7 @@ sys.path.insert(0, os.getcwd() + "/mapengine")
 import mapengine
 from mapengine import Scene, simpleloop
 from mapengine.base import Actor, MainActor, GameObject, Directions, Event, Vector
+from mapengine import Cut
 
 class ator_voador(MainActor):
     pass
@@ -100,16 +101,25 @@ class Portal(GameObject):
         other.events.add(Event(20, self.passar_fase, None))
 
     def passar_fase(self):
+        mensagens = [
+            u"Proxima fase!",
+            u"Ainda tem mais",
+            u"Mais dificil",
+            u"E a fase Bônus!"
+        ]
         scene_name = self.controller.scene.scene_name
         scene_number = int(scene_name.split("_")[-1])
         next_scene = "fase_%d" % (scene_number + 1)
         cena = Scene(next_scene)
+        cena.pre_cut = Cut(mensagens[scene_number - 1])
         self.controller.load_scene(cena)
+        self.controller.soft_reset()
         self.controller.force_redraw = True
            
     
 def main():
     scene = Scene("fase_1")
+    scene.pre_cut = Cut("Bem-vindo ao labirinto")
     simpleloop(scene, (800,600),)
 
  
